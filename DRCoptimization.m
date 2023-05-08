@@ -41,22 +41,22 @@ disp(x)
 
 end
 
-function e = eSIILoss()
+function e = eSIILoss(Attacktime,ReleaceTime,Threshold,Ratio,KneeWidth,MakeUpGain);
 % use this for computing the loss/fitness function for the GA
 
 targetsnr = -9;
 
 % read the speech file(s)
 [y, Fs] = audioread('-/Volumes/HUNTER/FW03/fto/word/fami1/list_a/fto_1a01.wav');
+y = resample(y,Fs,16000);
 
 % set the compressor with the values given by the GA
 
-comp = audioCompressor('Threshold', -30, 'Ratio', 4);
+comp = Compressor('Attacktime',[0.0 .050],'ReleaceTime',[0.0 .050],'Threshold',[-60 0],'Ratio',[1 10],'KneeWidth',[0 6],'MakeUpGain',[0 6]);
 
 % process the speech file with the compressor and save it in y
 
 y_comp = comp(y);
-audiowrite('fto_1a01_compressed.wav', y_comp, Fs);
 
 % Mix the result with the noise at the given SNR
 
