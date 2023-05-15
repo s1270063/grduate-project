@@ -31,9 +31,13 @@ gaoptions = optimoptions(@ga,...
 
 % This is the way to invoke the GA
 
+lowBoundariesOfThe6Parameters = [0,0,-60,1,0,0];
+upperBoundariesOfThe6Parameters = [.050,.050,0,10,6,6];
+
+
 [x,~]=ga(@(x) eSIILoss(x(1), x(2),x(3),x(4),x(5),x(6)), ... % make sure that eSIILoss has the same parameters
     numberOfVariables,[],[],[],[],lowBoundariesOfThe6Parameters,...
-    lowBoundariesOfThe6Parameters,[],...
+    upperBoundariesOfThe6Parameters,[],...
     gaoptions);
 
 % Display the final results for reporting
@@ -48,11 +52,11 @@ targetsnr = -9;
 
 % read the speech file(s)
 [y, Fs] = audioread('-/Volumes/HUNTER/FW03/fto/word/fami1/list_a/fto_1a01.wav');
-y = resample(y,Fs,16000);
+[y, Fs] = resample(y,Fs,16000);
 
 % set the compressor with the values given by the GA
 
-comp = Compressor('Attacktime',[0.0 .050],'ReleaceTime',[0.0 .050],'Threshold',[-60 0],'Ratio',[1 10],'KneeWidth',[0 6],'MakeUpGain',[0 6]);
+comp = compressor('Attacktime',Attacktime,'ReleaceTime',ReleaceTime,'Threshold',Threshold,'Ratio',Ratio,'KneeWidth',KneeWidth,'MakeUpGain',MakeUpGain);
 
 % process the speech file with the compressor and save it in y
 
