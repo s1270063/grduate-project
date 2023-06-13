@@ -51,7 +51,13 @@ function e = eSIILoss(AttackTime,ReleaseTime,Threshold,Ratio,KneeWidth,MakeUpGai
 targetsnr = -9;
 
 % read the speech file(s)
-[y, Fs] = audioread('/FW03/fto/word/fami1/list_a/fto_1a01.wav');
+directory = '~/Graduate/project/grduate-project/FW03/word/fami1/list_a'; 
+fileList = dir(fullfile(directory, '*.wav'));  
+
+numFiles = numel(fileList); 
+randomIndex = randi([1, numFiles], 1); 
+selectedFile = fullfile(directory, fileList(randomIndex).name);  
+[y, Fs] = audioread(selectedFile);
 
 % our target is 16,000 but if the audio is already 16,000 then we do not
 % have to do anything.
@@ -71,19 +77,33 @@ y = comp(y);
 % Mix the result with the noise at the given SNR
 
 % Read the noise and resample the noise
+directory2 = '~/Graduate/project/grduate-project/Noises'; 
+fileList2 = dir(fullfile(directory2, '*.wav'));  
+numFiles = numel(fileList2); 
+randomIndex = randi([1, numFiles], 1);  
 
-[y_noise, Fs2] =audioread('Noises/CCITTRec227_16kHz.wav');
+selectedFile = fullfile(directory, fileList(randomIndex).name);  
+
+[y_noise, Fs2] = audioread(selectedFile); 
 
 if Fs2 ~= 16000
     y_noise =resample(y_noise,Fs2,16000);
 end
 
-% Study what is SNR and how to applied to a signal.
+slen = length(y);
 
+%CREATING WHITE NOISE
+mlen = length(y_noise)-slen-1;
+from = randi(mlen);
+bgNoise = y_noise(from: from+slen);
+bgNoise = bgNoise/max(abs(bgNoise));
+bgNoise = bgNoise(1:slen);
+
+% Study what is SNR and how to applied to a signal
 [~,xm,~] = mixsignal(y,bgNoise,targetsnr);
 
 % compute the eSII, if the noise is cafeteria use 'FN' otherwise use 'SN'
-[~, ~, esii, ~] = extSII(xm, bgNoise, sr, 'FN'); %'SN'
+[~, ~, esii, ~] = extSII(xm, bgNoise, 16000, 'FN'); %'SN'
 
 %return the loss as
 e = log(1-esii);
